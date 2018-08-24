@@ -1,0 +1,32 @@
+/*author Михаил Сазонов https://github.com/sazanof*/
+<?php
+if(!defined('MODX_BASE_PATH')){die('What are you doing? Get out of here!');}
+$access_token = isset($access_token) ? $access_token : 'Ваш токен';
+$limit = isset($limit) ? $limit : 6;
+$user = isset($user) ? $user : ВАШ_ID;
+$outerTpl = isset($outerTpl) ? $outerTpl : '<div class="i_images">[ +i.wrapper+ ]</div>';
+$rowTpl = isset($rowTpl) ? $rowTpl : '<a href="[ +i.href+ ]" target="_blank"><img src="[ +i.src+ ]"></a>';
+if (@file_get_contents('https://api.instagram.com/v1/users/'.$user.'/media/recent/?access_token='.$access_token)) {
+    $inst = @file_get_contents('https://api.instagram.com/v1/users/'.$user.'/media/recent/?access_token='.$access_token);
+    $inst = json_decode($inst,true);
+    if (is_array($inst['data']) and count($inst['data'])>0){
+        $i = 0;
+        $data = $inst['data'];
+        while ($i < $limit)
+        {
+            $r = array($data[$i]['link'],$data[$i]['images']['thumbnail']['url']); 
+            $f = array('[ +i.href+ ]', '[ +i.src+ ]');
+            $out .= $rowTpl;
+            $out = str_replace($f,$r,$out);
+            $i++;
+        }
+        $outerTpl = str_replace('[ +i.wrapper+ ]',$out,$outerTpl);
+        return $outerTpl;
+    }
+    else {
+        return '';
+    }
+}
+else {
+    return '';
+}
